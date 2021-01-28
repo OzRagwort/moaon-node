@@ -33,6 +33,23 @@ pubsub.on("error", function(error){
     console.log(error);
 });
 
+pubsub.on("feed", function(data){
+    var xmlToJson = convert.xml2json(data.feed, {compact: true, ignoreComment: true, spaces: 4});
+    var json = JSON.parse(xmlToJson);
+
+    console.log(xmlToJson);
+
+    if (json["feed"].hasOwnProperty("entry")) {
+      // 생성, 수정
+      var videoId = json["feed"]["entry"]["yt:videoId"]["_text"];
+      myServer.postvideoById(videoId);
+  	} else if (json["feed"].hasOwnProperty("at:deleted-entry")) {
+      // 삭제
+      var videoId = json["feed"]["at:deleted-entry"]["_attributes"]["ref"].substr(9,11);
+      myServer.deletevideoById(videoId);
+  	}
+});
+
 pubsub.on("listen", async function() {
   console.log("Server listening on port %s", pubsub.port);
   subscribeChannels();
