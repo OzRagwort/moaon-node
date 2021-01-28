@@ -1,31 +1,35 @@
 var pubSubHubbub = require("./pubsubhubbub"),
     crypto = require("crypto"),
+    convert = require("xml-js"),
+    async = require("async"),
+    fs = require("fs"),
+
+    callbackInfoFile = fs.readFileSync('./secret/callbackServerInfo.json', 'utf8'),
+    callbackInfoJson = JSON.parse(callbackInfoFile);
 
     pubsub = pubSubHubbub.createServer({
-        callbackUrl: "exampleHost:examplePort",
-        secret: "exampleSecret"
+        callbackUrl: `${callbackInfoJson.host}:${callbackInfoJson.port}`,
+        secret: `${callbackInfoJson.secret}`
     });
 
-pubsub.listen(1337);
+pubsub.listen(`${callbackInfoJson.port}`);
 
 pubsub.on("denied", function(data){
-  console.log("Denied");
+    console.log("Denied");
+    console.log(data);
 });
 
 pubsub.on("subscribe", function(data){
-  console.log("Subscribed");
+    console.log("Subscribed " + data.topic+" to " + data.hub);
 });
 
 pubsub.on("unsubscribe", function(data){
-  console.log("Unsubscribed");
+    console.log("Unsubscribed " + data.topic + " from " + data.hub);
 });
 
 pubsub.on("error", function(error){
-  console.log("Error");
-});
-
-pubsub.on("feed", function(data){
-  console.log("Feed");
+    console.log("Error message : ");
+    console.log(error);
 });
 
 pubsub.on("listen", async function() {
