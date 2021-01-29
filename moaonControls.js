@@ -1,12 +1,16 @@
 const http = require("http"),
       async = require("async"),
       fetch = require("node-fetch"),
+      moment = require("moment"),
+      mtz = require("moment-timezone"),
 
       fs = require("fs"),
       serverInfoFile = fs.readFileSync('./secret/moaonServerInfo.json', 'utf8'),
       serverInfoJson = JSON.parse(serverInfoFile),
 
       serverUri = `${serverInfoJson.host}:${serverInfoJson.port}`;
+
+moment.tz.setDefault("Asia/Seoul");
 
 module.exports = {
   // 전체 채널 정보 가져오기
@@ -57,7 +61,10 @@ function postVideo(id, uri) {
     },
     body: JSON.stringify(data),
   })
-    .then(res => res.text())
+    .then(res => {
+      res.text();
+      console.log("[%s] update => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+    })
     .then(json => {return json;});
 }
 
@@ -65,6 +72,9 @@ function deleteVideo(uri) {
   return fetch(uri, {
     method: 'DELETE',
   })
-    .then(res => res.text())
+    .then(res => {
+      res.text();
+      console.log("[%s] delete => %s", moment().format('YYYY-MM-DD HH:mm:ss'), uri.slice(-11));
+    })
     .then(json => {return json;});
 }
