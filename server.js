@@ -1,5 +1,7 @@
 var pubSubHubbub = require("./pubsubhubbub"),
     myServer = require("./moaonControls"),
+    moment = require("moment"),
+    mtz = require("moment-timezone"),
     crypto = require("crypto"),
     convert = require("xml-js"),
     async = require("async"),
@@ -8,36 +10,35 @@ var pubSubHubbub = require("./pubsubhubbub"),
     callbackInfoFile = fs.readFileSync('./secret/callbackServerInfo.json', 'utf8'),
     callbackInfoJson = JSON.parse(callbackInfoFile);
 
-    pubsub = pubSubHubbub.createServer({
-        callbackUrl: `${callbackInfoJson.host}:${callbackInfoJson.port}`,
-        secret: `${callbackInfoJson.secret}`
-    });
+pubsub = pubSubHubbub.createServer({
+    callbackUrl: `${callbackInfoJson.host}:${callbackInfoJson.port}`
+});
 
 pubsub.listen(`${callbackInfoJson.port}`);
 
+moment.tz.setDefault("Asia/Seoul");
+
 pubsub.on("denied", function(data){
-    console.log("Denied");
+    console.log("[%s] Denied", moment().format('YYYY-MM-DD HH:mm:ss'));
     console.log(data);
 });
 
 pubsub.on("subscribe", function(data){
-    console.log("Subscribed " + data.topic+" to " + data.hub);
+  console.log("[%s] Subscribed " + data.topic, moment().format('YYYY-MM-DD HH:mm:ss'));
 });
 
 pubsub.on("unsubscribe", function(data){
-    console.log("Unsubscribed " + data.topic + " from " + data.hub);
+  console.log("[%s] Unsubscribed " + data.topic, moment().format('YYYY-MM-DD HH:mm:ss'));
 });
 
 pubsub.on("error", function(error){
-    console.log("Error");
-    console.log(error);
+  console.log("Error", moment().format('YYYY-MM-DD HH:mm:ss'));
+  console.log(error);
 });
 
 pubsub.on("feed", function(data){
     var xmlToJson = convert.xml2json(data.feed, {compact: true, ignoreComment: true, spaces: 4});
     var json = JSON.parse(xmlToJson);
-
-    console.log(xmlToJson);
 
     if (json["feed"].hasOwnProperty("entry")) {
       // 생성, 수정
@@ -50,8 +51,8 @@ pubsub.on("feed", function(data){
   	}
 });
 
-pubsub.on("listen", async function() {
-  console.log("Server listening on port %s", pubsub.port);
+pubsub.on("listen", function() {
+  console.log("[%s] Start server", moment().format('YYYY-MM-DD HH:mm:ss'));
   subscribeChannels();
 });
 
@@ -60,6 +61,7 @@ async function subscribeChannels() {
   var page = 1,
       size = 10,
       channels = "",
+      topic = "",
       seedTopic = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=",
       hub = "https://pubsubhubbub.appspot.com";
 
@@ -70,7 +72,7 @@ async function subscribeChannels() {
       if (channel.hasOwnProperty("channelId")) {
         topic = seedTopic + channel.channelId;
       	pubsub.subscribe(topic, hub, function(err){
-            if(err){console.log("%s Failed subscribing", pubsub.topic);}
+            if(err){console.log("[%s] %s Failed subscribing", moment().format('YYYY-MM-DD HH:mm:ss'), pubsub.topic);}
         });
       }
     }
