@@ -8,10 +8,9 @@ var pubSubHubbub = require("./pubsubhubbub"),
     callbackInfoFile = fs.readFileSync('./secret/callbackServerInfo.json', 'utf8'),
     callbackInfoJson = JSON.parse(callbackInfoFile);
 
-    pubsub = pubSubHubbub.createServer({
-        callbackUrl: `${callbackInfoJson.host}:${callbackInfoJson.port}`,
-        secret: `${callbackInfoJson.secret}`
-    });
+pubsub = pubSubHubbub.createServer({
+    callbackUrl: `${callbackInfoJson.host}:${callbackInfoJson.port}`
+});
 
 pubsub.listen(`${callbackInfoJson.port}`);
 
