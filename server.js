@@ -6,6 +6,7 @@ var pubSubHubbub = require("./pubsubhubbub"),
     convert = require("xml-js"),
     async = require("async"),
     fs = require("fs"),
+    schedule = require("node-schedule")
 
     callbackInfoFile = fs.readFileSync('./secret/callbackServerInfo.json', 'utf8'),
     callbackInfoJson = JSON.parse(callbackInfoFile);
@@ -54,6 +55,10 @@ pubsub.on("feed", function(data){
 pubsub.on("listen", function() {
   console.log("[%s] Start server", moment().format('YYYY-MM-DD HH:mm:ss'));
   subscribeChannels();
+  var job = schedule.scheduleJob('0 0 3 * * *', function() {
+    console.log("[%s] channel subscribe", moment().format('YYYY-MM-DD HH:mm:ss'));
+    subscribeChannels();
+  });
 });
 
 async function subscribeChannels() {
