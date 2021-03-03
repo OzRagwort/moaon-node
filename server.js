@@ -77,10 +77,18 @@ async function subscribeChannels() {
       if (channel.hasOwnProperty("channelId")) {
         topic = seedTopic + channel.channelId;
       	pubsub.subscribe(topic, hub, function(err){
-            if(err){console.log("[%s] %s Failed subscribing", moment().format('YYYY-MM-DD HH:mm:ss'), pubsub.topic);}
+            if(err){console.log("[%s] %s -> %s Failed subscribing", moment().format('YYYY-MM-DD HH:mm:ss'), channel.channelId, pubsub.topic);}
         });
       }
     }
+
+    sleep(5000);
+
   } while (channels != "");
 
+}
+
+function sleep(ms) {
+  const wakeUpTime = Date.now() + ms
+  while (Date.now() < wakeUpTime) {}
 }
