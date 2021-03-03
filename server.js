@@ -54,7 +54,6 @@ pubsub.on("feed", function(data){
 
 pubsub.on("listen", function() {
   console.log("[%s] Start server", moment().format('YYYY-MM-DD HH:mm:ss'));
-  subscribeChannels();
   var job = schedule.scheduleJob('0 0 3 * * *', function() {
     console.log("[%s] channel subscribe", moment().format('YYYY-MM-DD HH:mm:ss'));
     subscribeChannels();
@@ -79,11 +78,9 @@ async function subscribeChannels() {
       	pubsub.subscribe(topic, hub, function(err){
             if(err){console.log("[%s] %s -> %s Failed subscribing", moment().format('YYYY-MM-DD HH:mm:ss'), channel.channelId, pubsub.topic);}
         });
+        sleep(1000);
       }
     }
-
-    sleep(5000);
-
   } while (channels != "");
 
 }
