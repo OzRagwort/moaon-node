@@ -44,7 +44,7 @@ pubsub.on("feed", function(data){
     if (json["feed"].hasOwnProperty("entry")) {
       // 생성, 수정
       var videoId = json["feed"]["entry"]["yt:videoId"]["_text"];
-      myServer.postvideoById(videoId);
+      myServer.updateVideoById(videoId);
   	} else if (json["feed"].hasOwnProperty("at:deleted-entry")) {
       // 삭제
       var videoId = json["feed"]["at:deleted-entry"]["_attributes"]["ref"].substr(9,11);
@@ -76,13 +76,12 @@ async function subscribeChannels() {
     for (var channel of channels) {
       if (channel.hasOwnProperty("channelId")) {
         topic = seedTopic + channel.channelId;
-        console.log(topic);
         pubsub.subscribe(topic, hub, function(err){
           if(err){console.log("[%s] %s -> Failed subscribing", moment().format('YYYY-MM-DD HH:mm:ss'), pubsub.topic);}
         });
       }
     }
-    await sleep(20000);
+    await sleep(2000);
   } while (channels != "");
 
 }

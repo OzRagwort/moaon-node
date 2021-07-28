@@ -15,31 +15,34 @@ moment.tz.setDefault("Asia/Seoul");
 module.exports = {
   // 전체 채널 정보 가져오기
   getChannels(page, size) {
-    var uri = `${serverUri}${serverInfoJson.pathChannels}?page=${page}&maxResults=${size}`;
+    var uri = `${serverUri}${serverInfoJson.pathChannels}?page=${page}&size=${size}`;
     return getData(uri);
   },
 
-  // 영상 정보 save
-  postvideoById(id) {
-    var uri = `${serverUri}${serverInfoJson.pathYtVideos}`;
-    return postVideo(id, uri);
+  // 영상 정보 save or update
+  updateVideoById(id) {
+    var videos = getVideos(id);
+    videos.then((video) => {
+      if (video.response == null) {
+        // save
+        var uri = `${serverUri}${serverInfoJson.pathUpdateVideos}`;
+        postVideo(id, uri);
+    	} else {
+        // update (서버에서 자동으로 최신화 함)
+        console.log("[%s] update => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+      }
+    });
   },
 
   // 영상 정보 delete
   deletevideoById(id) {
     var uri = `${serverUri}${serverInfoJson.pathVideos}/${id}`;
-    return deleteVideo(uri);
-  },
-
-  // 비디오 가져오기
-  getVideos(id) {
-    var uri = `${serverUri}${serverInfoJson.pathVideos}/${id}`;
-    return getData(uri);
+    deleteVideo(id, uri);
   },
 
   // 특정 카테고리의 채널 정보 가져오기
   getChannelsByCategory(category, page, size) {
-    var uri = `${serverUri}${serverInfoJson.pathChannels}?category=${category}&page=${page}&maxResults=${size}`;
+    var uri = `${serverUri}${serverInfoJson.pathChannels}?category=${category}&page=${page}&size=${size}`;
     return getData(uri);
   }
 
@@ -47,8 +50,15 @@ module.exports = {
 
 function getData(uri) {
   return fetch(uri)
-    .then(res => res.json())
-    .then(json => {return json;});
+    .then(function(response) {
+      return response.json();
+    });
+}
+
+// 비디오 가져오기
+function getVideos(id) {
+  var uri = `${serverUri}${serverInfoJson.pathVideos}/${id}`;
+  return getData(uri);
 }
 
 function postVideo(id, uri) {
@@ -61,20 +71,33 @@ function postVideo(id, uri) {
     },
     body: JSON.stringify(data),
   })
-    .then(res => {
-      res.text();
-      console.log("[%s] update => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+    .then(function(response) {
+      return response.json();
     })
-    .then(json => {return json;});
+    .then(function(myJson) {
+      if (myJson.response == null) {
+        console.log("[%s] save fail => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+      } else {
+        console.log("[%s] save => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+      }
+    });
 }
 
-function deleteVideo(uri) {
+function deleteVideo(id, uri) {
   return fetch(uri, {
     method: 'DELETE',
+    headers: {
+        'Content-Type': 'application/json'
+    },
   })
-    .then(res => {
-      res.text();
-      console.log("[%s] delete => %s", moment().format('YYYY-MM-DD HH:mm:ss'), uri.slice(-11));
+    .then(function(response) {
+      return response.json();
     })
-    .then(json => {return json;});
+    .then(function(myJson) {
+      if (myJson.response == null) {
+        console.log("[%s] delete fail => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+      } else {
+        console.log("[%s] delete => %s", moment().format('YYYY-MM-DD HH:mm:ss'), id);
+      }
+    });
 }
