@@ -38,12 +38,6 @@ module.exports = {
   deletevideoById(id) {
     var uri = `${serverUri}${serverInfoJson.pathVideos}/${id}`;
     deleteVideo(id, uri);
-  },
-
-  // 특정 카테고리의 채널 정보 가져오기
-  getChannelsByCategory(category, page, size) {
-    var uri = `${serverUri}${serverInfoJson.pathChannels}?category=${category}&page=${page}&size=${size}`;
-    return getData(uri);
   }
 
 }
