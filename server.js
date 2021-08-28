@@ -71,7 +71,7 @@ async function subscribeChannels() {
       hub = "https://pubsubhubbub.appspot.com";
 
   do {
-    channels = await myServer.getChannels(page++, size);
+    channels = (await myServer.getChannels(page++, size)).response;
 
     for (var channel of channels) {
       if (channel.hasOwnProperty("channelId")) {
