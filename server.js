@@ -63,7 +63,7 @@ pubsub.on("listen", function() {
 
 async function subscribeChannels() {
   // 서버에서 채널 정보 받아온 뒤 구독하는 코드
-  var page = 1,
+  var page = 0,
       size = 10,
       channels = "",
       topic = "",
